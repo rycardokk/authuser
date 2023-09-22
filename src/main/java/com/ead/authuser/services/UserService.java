@@ -22,4 +22,7 @@ public interface UserService {
     boolean existsByEmail(String email);
 
     Page<UserModel> findAll(Specification<UserModel> spec, Pageable pageable);
+
+    UserModel saveUser(UserModel userModel);
+
 }
