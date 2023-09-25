@@ -7,9 +7,9 @@ spring:
   application:
     name: ead-authuser-service
   datasource:
-    url:  jdbc:postgresql://localhost:5432/ead-authuser-v2
-    username: postgres
-    password: root
+    url:  ${POSTGRES_URL:jdbc:postgresql://localhost:5432/ead-authuser-v2}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:root}
   jpa:
     hibernate:
       ddl-auto: update
