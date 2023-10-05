@@ -75,6 +75,7 @@ public class UserServiceImpl implements UserService {
         return userModel;
     }
 
+    @Transactional
     @Override
     public void deleteUser(UserModel userModel) {
         delete(userModel);

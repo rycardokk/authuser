@@ -6,10 +6,17 @@ server:
 spring:
   application:
     name: ead-authuser-service
+  config:
+    import: 'optional:configserver:'
+  cloud:
+    config:
+      discovery:
+        service-id: ead-config-server
+
   datasource:
-    url:  ${POSTGRES_URL:jdbc:postgresql://localhost:5432/ead-authuser-v2}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:root}
+    url: jdbc:postgresql://localhost:5432/ead-authuser-v2
+    username: postgres
+    password: root
   jpa:
     hibernate:
       ddl-auto: update
@@ -40,9 +47,37 @@ ead:
     exchange:
       userEvent: ead.userevent
 
+authuser:
+  refreshscope:
+    name: Ricardo Lemos Oliveira!
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - refresh
+          - health
+
 eureka:
   client:
     serviceUrl:
       defaultZone: 'http://localhost:8761/eureka'
   instance:
     hostname: localhost
+
+resilience4j:
+  circuit breaker:
+    instances:
+      circuit breakerInstance:
+        sliding-window-size: 30
+        permitted-number-of-calls-in-half-open-state: 2
+        sliding-window-type: TIME_BASED
+        minimum-number-of-calls: 2
+        wait-duration-in-open-state: 30s
+        failure-rate-threshold: 80
+  retry:
+    instances:
+      retryInstance:
+        maxRetryAttempts: 3
+        waitDuration: 5s

@@ -14,11 +14,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitmqConfig {
 
-    @Autowired
+    final
     CachingConnectionFactory cachingConnectionFactory;
 
     @Value(value = "${ead.broker.exchange.userEvent}")
     private String exchangeUserEvent;
+
+    public RabbitmqConfig(CachingConnectionFactory cachingConnectionFactory) {
+        this.cachingConnectionFactory = cachingConnectionFactory;
+    }
 
     @Bean
     public RabbitTemplate rabbitTemplate() {
