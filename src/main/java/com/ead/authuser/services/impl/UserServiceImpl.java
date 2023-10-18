@@ -21,15 +21,21 @@ import java.util.UUID;
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
+    final
     UserRepository userRepository;
 
 
-    @Autowired
+    final
     CourseClient courseClient;
 
-    @Autowired
+    final
     UserEventPublisher userEventPublisher;
+
+    public UserServiceImpl(UserRepository userRepository, CourseClient courseClient, UserEventPublisher userEventPublisher) {
+        this.userRepository = userRepository;
+        this.courseClient = courseClient;
+        this.userEventPublisher = userEventPublisher;
+    }
 
     @Override
     public List<UserModel> findAll() {

@@ -1,0 +1,41 @@
+FORMAT==100
+#Region System
+FEEDSTRINGS;
+SKIPCHECK;
+#EndRegion
+
+['Frn'] = S: IF( ELLEV('04_Mes', !04_Mes)=0 &
+				 ELLEV('02_Conta_Consolidada', !02_Conta_Consolidada)=0 &
+				 ELLEV('02_Centro_Custo', !02_Centro_Custo)=0 &
+                 ELLEV('03_Lancto_Contabil', !03_Lancto_Contabil)=0
+				 ,STET,'');
+
+#['State']=S:
+#  IF(DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'Frn')@<>'' &
+#      ['Vlr_Mda_Obj'] <>0 & DIMIX('02_Fornecedor_OVH', DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'Frn'))=0,
+#      'Fornecedor Não Cadastrado', Continue);
+
+['State']=S:
+  IF(DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'Frn')@='' &
+      ['Vlr_Mda_Obj'] <>0,
+  'Fill supplier', 'OK');
+
+['Scr_Ctl']=N:
+   IF(DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'State')	@<>'OK',1,0);
+
+#['Frn'] = S: IF (DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'Frn_Aux')@<>'',
+#		DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'Frn_Aux'), STET);
+
+
+['Vlr_Mda_Obj_c_forn'] = N: IF (DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'State') @='OK', ['Vlr_Mda_Obj'], 0);
+
+['Vlr_Mda_Trnsc_c_forn'] = N: IF (DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'State') @='OK', ['Vlr_Mda_Trnsc'], 0);
+
+
+FEEDERS;
+
+['Vlr_Mda_Obj'] => ['State'],['Scr_Ctl'];
+
+['Frn'] => ['Vlr_Mda_Trnsc_c_forn'], ['Vlr_Mda_Obj_c_forn'];
+
+#['Frn_Aux'] => DB('OVH_Lancamento_Contabil',!04_Ano,!04_Mes,!02_Conta_Consolidada,!02_Centro_Custo,!03_Lancto_Contabil,'Frn');

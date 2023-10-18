@@ -1,0 +1,240 @@
+
+#****Begin: Generated Statements***
+#****End: Generated Statements****
+
+OldCubeLogChanges = CUBEGETLOGCHANGES('OVH_Actual_FTE');
+CUBESETLOGCHANGES('OVH_Actual_FTE', 0);
+
+
+573,49
+
+#****Begin: Generated Statements***
+vEmployee_name=SUBST(Employee_name,Scan(',',Employee_name)+1,100)|' '|
+SUBST(Employee_name,1,Scan(',',Employee_name)-1);
+#****End: Generated Statements****
+
+vEmployee_name=SUBST(Employee_name,Scan(',',Employee_name)+1,100)|' '|
+SUBST(Employee_name,1,Scan(',',Employee_name)-1);
+
+#Caso o arquivo disponibilizado pela UNL seja formatado como dia/mes/ano
+#Ano=SUBST(Período,7,4);
+#Mes=SUBST(Período,4,2);
+
+#Caso o arquivo disponibilizado pela UNL seja formatado como ano/mes/dia
+Ano=SUBST(Período,1,4);
+Mes=SUBST(Período,6,2);
+
+
+vTotalizador='TOTAL_EMPREGADOS';
+DIMENSIONELEMENTINSERT('03_Empregados','',vEmployee_name,'n');
+DIMENSIONELEMENTINSERT('03_Empregados','',vTotalizador,'c');
+DIMENSIONELEMENTCOMPONENTADD('03_Empregados',vTotalizador,vEmployee_name,1.000000);
+
+IF( DimensionElementExists('02_Centro_Custo', Cod_Ceco) = 0);
+
+	vErrorMessage = 'Cost Center'|' '|Cod_Ceco|' '|'not registered';
+
+	ItemReject ( vErrorMessage );
+
+
+ENDIF;
+
+IF( DimensionElementExists('03_Worklevel', Worklevel) = 0);
+
+	vErrorMessage = 'Worklevel'|' '|Worklevel|' '|'not registered';
+
+	ItemReject ( vErrorMessage );
+
+
+ENDIF;
+
+#IF(ATTRS('02_Centro_Custo', Cod_Ceco, 'Status_Item')@= 'Inactive');
+
+#	vErrorMessage = 'Cost Center'|' '|Cod_Ceco|' '|'inactive';
+
+#	ItemReject ( vErrorMessage );
+
+#ENDIF;
+
+574,45
+vEmployee_name=SUBST(Employee_name,Scan(',',Employee_name)+1,100)|' '|
+SUBST(Employee_name,1,Scan(',',Employee_name)-1);
+
+
+IF(
+
+      DIMIX('02_Centro_Custo', Cod_CeCo)>0);
+
+#****Begin: Generated Statements***
+vEmployee_name=SUBST(Employee_name,Scan(',',Employee_name)+1,100)|' '|
+SUBST(Employee_name,1,Scan(',',Employee_name)-1);
+#****End: Generated Statements****
+
+
+
+#Caso o arquivo disponibilizado pela UNL seja formatado como ano/mes/dia
+#Ano=SUBST(Período,7,4);
+#Mes=SUBST(Período,4,2);
+
+#Caso o arquivo disponibilizado pela UNL seja formatado como dia/mes/ano
+Ano=SUBST(Período,1,4);
+Mes=SUBST(Período,6,2);
+
+
+vPeriodo = Mes|'_'|Ano;
+
+vAnoReallizado = CellGetS('}ElementAttributes_04_Periodo', vPeriodo,'Mes_Realizado');
+
+	#########################
+
+#	IF ( vAnoReallizado @<>'');
+
+	CellPutS(Worklevel,'OVH_Actual_FTE',Ano,Mes,Cod_CeCo,vEmployee_name,'Wkl');
+	CellPutN(FTE,'OVH_Actual_FTE',Ano,Mes,Cod_CeCo,vEmployee_name,'fte');
+	CellPutN(Time_In_Position,'OVH_Actual_FTE',Ano,Mes,Cod_CeCo,vEmployee_name,'tip');
+	CellPutS(Position_title,'OVH_Actual_FTE',Ano,Mes,Cod_CeCo,vEmployee_name,'ptt');
+
+	############
+
+#	ENDIF;
+
+ENDIF;
+
+TextOutPut ('.\Arquivos\Export\Export_Actual_FTE.txt',Ano,Mes, vPeriodo, vAnoReallizado, Cod_Ceco, vEmployee_name, Worklevel,NumberToString (FTE));
+
+575,95
+
+#****Begin: Generated Statements***
+#****End: Generated Statements****
+
+
+vDim = '03_Empregados';
+
+vHistDim='zHI_'|vDim;
+
+	IF( DimensionExists(vHistDim) =1 );
+
+		ExecuteProcess('SYS_exe_HIST_atl_Dimensoes','pSourceDim',vDim, 'pTargetDim', vHistDim, 'pAttr', 1, 'pUnwind', 0 , 'pDebug', 0 );
+
+	ENDIF;
+
+
+ExecuteProcess('CRG_BDG_Drivers_Criterios_Rateio(Actual_FTE)');
+#ExecuteProcess('SYS_exe_Actual_All_Inicial','pAtualizar','Sim','pModulo','Mod1');
+ExecuteProcess('CRG_REP_OVH_CeCo_Actual_Interno_Zera');
+ExecuteProcess('CRG_REP_OVH_CeCo(Actual_FTE)');
+ExecuteProcess('CRG_REP_OVH_Ceco_FTE_VLR(FTE_Actual)');
+
+###Script para geração de log
+
+DatasourceASCIIQuoteCharacter='';
+
+vCarga='CRG_OVH_Actual_FTE';
+
+vError=GetProcessErrorFileDirectory | GetProcessErrorFilename;
+vProcessErrorFileDirectory=GetProcessErrorFileDirectory;
+vProcessErrorFileName=GetProcessErrorFilename;
+vName= GetProcessName();
+vUsuario = TM1User();
+vDescUsuario = ATTRS('}Clients', vUsuario, '}TM1_DefaultDisplayValue');
+vErroFile=GetProcessErrorFilename;
+#CMA = CellGetS('SYS_Parametros_System', 'Parametro','BatLOG');
+#CMD= CellGetS('SYS_Parametros_System', 'Parametro','BatLOG_Destino');
+vDataHoje = CellGetS('SYS_Parametros_System', 'Parametro','Hoje(dma)');
+vHoraUTC = CellGetS('SYS_Parametros_System', 'Parametro','SysTime_UTC');
+v_data=vDataHoje|' - '|vHoraUTC;
+
+IF (vErroFile@<>' ' );
+
+	CellPuts('Processo Finalizado em:'| v_data,'SYS_Controle_Carga',vCarga,'Comentario');
+	CellPuts('Ended in error:'| v_data,'SYS_Controle_Carga',vCarga,'Status_Carga');
+	CELLINCREMENTN(1,'SYS_Controle_Carga',vCarga,'Status');
+	CellPuts(v_data,'SYS_Controle_Carga',vCarga,'Data');
+	CellPuts('X','SYS_Controle_Carga',vCarga,'Comentario_carga');
+	CellPuts(vDescUsuario,'SYS_Controle_Carga',vCarga,'Nome');
+	#TextoutPut(CMA,'Copy'|' '|'"'|vError|'"'|' '|CMD );
+
+ENDIF;
+
+
+IF (vErroFile@=' ' );
+
+	CellPuts('Processo Finalizado em:'| v_data,'SYS_Controle_Carga',vCarga,'Comentario');
+	CellPuts('Successfully completed:'| v_data,'SYS_Controle_Carga',vCarga,'Status_Carga');
+	CELLINCREMENTN(0,'SYS_Controle_Carga',vCarga,'Status');
+	CellPuts(v_data,'SYS_Controle_Carga',vCarga,'Data');
+	CellPuts('OK','SYS_Controle_Carga',vCarga,'Comentario_carga');
+	CellPuts(vDescUsuario,'SYS_Controle_Carga',vCarga,'Nome');
+
+ENDIF;
+
+
+
+IF (vErroFile@<>' ' );
+
+	CellPuts('Processo Finalizado em:'| v_data,'SYS_Controle_Processos',vName,'Comentario');
+	CellPuts('Erros '| v_data,'SYS_Controle_Processos',vName,'Status');
+	CellPuts(v_data,'SYS_Controle_Processos',vName,'Data');
+	#IF (FileExists(CMA)=1);
+
+	#	ExecuteCommand(CMA,0);
+
+	#ENDIF;
+
+
+ENDIF;
+
+
+IF (vErroFile@=' ' );
+
+	CellPuts('Processo Finalizado em:'| v_data,'SYS_Controle_Processos',vName,'Comentario');
+	CellPuts('Executado '| v_data,'SYS_Controle_Processos',vName,'Status');
+	CellPuts(v_data,'SYS_Controle_Processos',vName,'Data');
+
+
+ENDIF;
+
+#Carrega a Log de Erro no cubo de Log
+
+RunProcess('SYS_Log_Erro_Processos','pProcesso',vName, 'pProcessErrorFileDirectory', vProcessErrorFileDirectory, 'pProcessErrorFileName', vProcessErrorFileName) ;
+
+576,CubeAction=1511DataAction=1503CubeLogChanges=0_ParameterConstraints=e30
+930,0
+638,1
+804,0
+1217,1
+900,
+901,
+902,
+938,0
+937,
+936,
+935,
+934,
+932,0
+933,0
+903,
+906,
+929,
+907,
+908,
+904,0
+905,0
+909,0
+911,
+912,
+913,
+914,
+915,
+916,
+917,0
+918,1
+919,0
+920,50000
+921,""
+922,""
+923,0
+924,""
+925,""
+926,""
+927,""

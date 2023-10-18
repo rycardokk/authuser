@@ -4,13 +4,13 @@ import io.jsonwebtoken.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 
-
-import java.security.SignatureException;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Component
@@ -22,16 +22,20 @@ public class JwtProvider {
     private int jwtExpirationMs;
 
     public String generateJwt(Authentication auth){
-        UserDetails userPrincipal = (UserDetailsImpl) auth.getPrincipal();
+        UserDetailsImpl userPrincipal = (UserDetailsImpl) auth.getPrincipal();
+        final String roles = userPrincipal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).collect((Collectors.joining(",")));
+
         return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())
+                .setSubject(userPrincipal.getUserId().toString())
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtKey)
                 .compact();
     }
 
-    public String getUsernameJwt(String token) {
+    public String getSubjectJwt(String token) {
         return Jwts.parser().setSigningKey(jwtKey).parseClaimsJws(token).getBody().getSubject();
     }
 
@@ -39,8 +43,6 @@ public class JwtProvider {
         try {
             Jwts.parser().setSigningKey(jwtKey).parseClaimsJws(authToken);
             return true;
-        } catch (SignatureException e) {
-            log.error("Invalid JWT signature: {}", e.getMessage());
         } catch (MalformedJwtException e){
             log.error("Invalid JWT token: {}", e.getMessage());
         } catch (ExpiredJwtException e) {

@@ -35,20 +35,30 @@ import java.time.ZoneId;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    @Autowired
+    final
     UserService userService;
 
-    @Autowired
+    final
     RoleService roleService;
 
-    @Autowired
+    final
     PasswordEncoder passwordEncoder;
 
-    @Autowired
+    final
     JwtProvider jwtProvider;
 
-    @Autowired
+    final
     AuthenticationManager authenticationManager;
+
+    public AuthenticationController(UserService userService, RoleService roleService,
+                                    PasswordEncoder passwordEncoder, JwtProvider jwtProvider,
+                                    AuthenticationManager authenticationManager) {
+        this.userService = userService;
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtProvider = jwtProvider;
+        this.authenticationManager = authenticationManager;
+    }
 
     @PostMapping("/signup")
     public ResponseEntity<Object> registerUser(@RequestBody @Validated(UserDto.UserView.RegistrationPost.class)
