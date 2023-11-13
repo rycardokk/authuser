@@ -32,11 +32,13 @@ spring:
   rabbitmq:
     addresses: amqps://qtcrpqtm:E6yccAiHom7OZw7rWJb9YGPbb6Qlo6qA@chimpanzee.rmq.cloudamqp.com/qtcrpqtm
 
+#com.ead: TRACE
+#org.springframework.web: DEBUG
 logging:
   level:
-    com.ead: TRACE
+    com.ead: INFO
     root: INFO
-    org.springframework.web: DEBUG
+    org.springframework.web: INFO
     org.hibernate: INFO
 
 ead:
