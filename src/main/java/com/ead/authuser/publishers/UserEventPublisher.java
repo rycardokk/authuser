@@ -1,4 +1,4 @@
-package com.ead.authuser.publushers;
+package com.ead.authuser.publishers;
 
 import com.ead.authuser.dtos.UserEventDto;
 import com.ead.authuser.enums.ActionType;
