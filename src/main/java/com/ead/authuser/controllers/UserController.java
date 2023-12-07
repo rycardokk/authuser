@@ -8,7 +8,6 @@ import com.ead.authuser.services.UserService;
 import com.ead.authuser.specifications.SpecificationTemplate;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
